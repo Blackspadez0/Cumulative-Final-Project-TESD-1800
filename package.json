@@ -1,0 +1,20 @@
+{
+  "name": "cumulative-final-project-tesd-1800",
+  "version": "1.0.0",
+  "description": "The goal of this project is to create a website for the selling and buying of products online.",
+  "homepage": "https://github.com/Blackspadez0/Cumulative-Final-Project-TESD-1800#readme",
+  "bugs": {
+    "url": "https://github.com/Blackspadez0/Cumulative-Final-Project-TESD-1800/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Blackspadez0/Cumulative-Final-Project-TESD-1800.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
