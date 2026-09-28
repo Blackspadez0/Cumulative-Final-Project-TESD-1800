@@ -16,5 +16,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "cypress": "^16.1.0"
+  },
+  "allowScripts": {
+    "cypress@16.1.0": true
   }
 }
