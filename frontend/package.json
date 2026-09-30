@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "dev": "npx vite --host"
+  },
+  "devDependencies": {
+    "cypress": "^16.1.1",
+    "vite": "^8.3.1"
+  },
+  "allowScripts": {
+    "cypress@16.1.1": true
+  }
+}
