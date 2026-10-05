@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Bogus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,31 +21,23 @@ var app = builder.Build();
 
 app.UseCors();
 
-// 3. Ensure Database Exists & Seed Test Data
+// 3. Ensure Database Exists
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
     db.Database.EnsureCreated();
-
-    if (!db.Products.Any())
-    {
-        var productFaker = new Faker<Product>()
-            .RuleFor(p => p.Name, f => f.Commerce.ProductName())
-            .RuleFor(p => p.Price, f => f.Finance.Amount(1, 100))
-            .RuleFor(p => p.InventoryCount, f => f.Random.Int(0, 100));
-
-        var fakeProducts = productFaker.Generate(2);
-
-        db.Products.AddRange(fakeProducts);
-        db.SaveChanges();
-    }
 }
 
 // 4. Create the requested Product Endpoint
 app.MapGet("/productAPI", async (AppDbContext db) =>
     await db.Products.ToListAsync());
-
+app.MapPost("/productAPI", async (Product product, AppDbContext db) =>
+{
+    product.Id = 0; // let SQLite assign the id
+    db.Products.Add(product);
+    await db.SaveChangesAsync();
+    return Results.Created($"/productAPI/{product.Id}", product);
+});
 app.Run();
 
 // 5. Models
