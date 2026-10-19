@@ -494,11 +494,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\web\\Documents\\GitHub\\Cumulative-Final-Project-TESD-1800\\Backend\\Backend.csproj",
+      "projectUniqueName": "C:\\Users\\web\\Downloads\\Cumulative-Final-Project-TESD-1800\\backend\\Backend.csproj",
       "projectName": "Backend",
-      "projectPath": "C:\\Users\\web\\Documents\\GitHub\\Cumulative-Final-Project-TESD-1800\\Backend\\Backend.csproj",
+      "projectPath": "C:\\Users\\web\\Downloads\\Cumulative-Final-Project-TESD-1800\\backend\\Backend.csproj",
       "packagesPath": "C:\\Users\\web\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\web\\Documents\\GitHub\\Cumulative-Final-Project-TESD-1800\\Backend\\obj\\",
+      "outputPath": "C:\\Users\\web\\Downloads\\Cumulative-Final-Project-TESD-1800\\backend\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
