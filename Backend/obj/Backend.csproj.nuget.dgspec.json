@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\web\\Downloads\\Cumulative-Final-Project-TESD-1800\\backend\\Backend.csproj": {}
+    "c:\\Users\\web\\Downloads\\Cumulative-Final-Project-TESD-1800\\backend\\Backend.csproj": {}
   },
   "projects": {
-    "C:\\Users\\web\\Downloads\\Cumulative-Final-Project-TESD-1800\\backend\\Backend.csproj": {
+    "c:\\Users\\web\\Downloads\\Cumulative-Final-Project-TESD-1800\\backend\\Backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\web\\Downloads\\Cumulative-Final-Project-TESD-1800\\backend\\Backend.csproj",
+        "projectUniqueName": "c:\\Users\\web\\Downloads\\Cumulative-Final-Project-TESD-1800\\backend\\Backend.csproj",
         "projectName": "Backend",
-        "projectPath": "C:\\Users\\web\\Downloads\\Cumulative-Final-Project-TESD-1800\\backend\\Backend.csproj",
+        "projectPath": "c:\\Users\\web\\Downloads\\Cumulative-Final-Project-TESD-1800\\backend\\Backend.csproj",
         "packagesPath": "C:\\Users\\web\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\web\\Downloads\\Cumulative-Final-Project-TESD-1800\\backend\\obj\\",
+        "outputPath": "c:\\Users\\web\\Downloads\\Cumulative-Final-Project-TESD-1800\\backend\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
