@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "38xV5F6unqI=",
+  "dgSpecHash": "PzM4D7lTswc=",
   "success": true,
-  "projectFilePath": "c:\\Users\\web\\Downloads\\Cumulative-Final-Project-TESD-1800\\Backend\\Backend.csproj",
+  "projectFilePath": "C:\\Users\\web\\Downloads\\Cumulative-Final-Project-TESD-1800\\Backend\\Backend.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\web\\.nuget\\packages\\microsoft.data.sqlite.core\\10.0.13\\microsoft.data.sqlite.core.10.0.13.nupkg.sha512",
     "C:\\Users\\web\\.nuget\\packages\\microsoft.entityframeworkcore\\10.0.13\\microsoft.entityframeworkcore.10.0.13.nupkg.sha512",
