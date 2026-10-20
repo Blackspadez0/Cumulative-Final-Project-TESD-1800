@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Home</title>
+        <script src="Products.js" type="module"></script>
+        <style>
+            /* Reset default browser margins and padding */
+            body {
+                margin: 0;
+                font-family: Arial, sans-serif;
+            }
+
+            /* Navbar container styling using Flexbox */
+            .navbar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background-color: #333;
+                padding: 10px 20px;
+            }
+
+            /* Branding/Logo styling */
+            .navbar-logo a {
+                color: #ffffff;
+                font-size: 24px;
+                font-weight: bold;
+                text-decoration: none;
+            }
+
+            /* Navigation links wrapper */
+            .nav-links {
+                list-style: none; /* Removes bullet points */
+                margin: 0;
+                padding: 0;
+                display: flex; /* Aligns list items horizontally */
+                gap: 20px; /* Spaces out the links */
+            }
+
+            /* Individual link styling */
+            .nav-links a {
+                color: #ffffff;
+                text-decoration: none; /* Removes underline */
+                font-size: 16px;
+                padding: 8px 12px;
+                transition: background-color 0.3s ease;
+                border-radius: 4px;
+            }
+
+            /* Hover effect for links */
+            .nav-links a:hover {
+                background-color: #555;
+                color: #00ecb9;
+            }
+        </style>
+    </head>
+    <body>
+        <nav class="navbar">
+            <ul class="nav-links">
+                <li><a href="Accounts.html">Create Account</a></li>
+                <li><a href="Index.html">Home</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <h1>Products:</h1>
+
+            <ul name="products-list"></ul>
+
+            <button id="create-product-button" type="button">Create New Product</button>
+
+            <form id="product-form" hidden>
+                <label>Name <input name="product" type="text" required /></label>
+                <label>Price <input name="price" type="number" step="0.01" min="0" required /></label>
+                <label>Inventory <input name="inventory" type="number" step="1" min="0" required /></label>
+                <button type="submit">Create Product</button>
+            </form>
+
+            <div id="confirmation" hidden>
+                <p>Product Created</p>
+                <a href="Products.html">Back to Products</a>
+            </div>
+        </main>
+    </body>
+</html>
