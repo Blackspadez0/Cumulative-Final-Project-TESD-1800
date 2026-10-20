@@ -6,7 +6,6 @@ C:\Users\web\Downloads\Cumulative-Final-Project-TESD-1800\backend\bin\Debug\net1
 C:\Users\web\Downloads\Cumulative-Final-Project-TESD-1800\backend\bin\Debug\net10.0\backend.runtimeconfig.json
 C:\Users\web\Downloads\Cumulative-Final-Project-TESD-1800\backend\bin\Debug\net10.0\backend.dll
 C:\Users\web\Downloads\Cumulative-Final-Project-TESD-1800\backend\bin\Debug\net10.0\backend.pdb
-C:\Users\web\Downloads\Cumulative-Final-Project-TESD-1800\backend\bin\Debug\net10.0\Bogus.dll
 C:\Users\web\Downloads\Cumulative-Final-Project-TESD-1800\backend\bin\Debug\net10.0\Microsoft.Data.Sqlite.dll
 C:\Users\web\Downloads\Cumulative-Final-Project-TESD-1800\backend\bin\Debug\net10.0\Microsoft.EntityFrameworkCore.dll
 C:\Users\web\Downloads\Cumulative-Final-Project-TESD-1800\backend\bin\Debug\net10.0\Microsoft.EntityFrameworkCore.Abstractions.dll
