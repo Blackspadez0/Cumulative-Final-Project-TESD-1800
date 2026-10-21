@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Sign up</title>
+        <script src="Signup.js" type="module"></script>
+        <link rel="stylesheet" href="navbar.css">
+        <script src="navbar.js" defer></script>
+    </head>
+    <body>
+        <div class="wrapper">
+            <nav class="navbar">
+                <a href="Index.html" id="link-1">Home</a>
+                <a href="Products.html" id="link-2">Products</a>
+                <a href="Signin.html" id="link-3">Sign in</a>
+                <a href="Signup.html" id="link-4">Sign up</a>
+            </nav>
+        </div>
+
+        <main class="page-content">
+            <form id="account-form">
+                <label>Email: <input name="Email" type="email" required autocomplete="email" /></label>
+                <label>Password: <input name="Password" type="password" required autocomplete="new-password" /></label>
+                <button type="submit">Create Account</button>
+            </form>
+            <p id="account-message" role="status" aria-live="polite" hidden></p>
+        </main>
+    </body>
+</html>
