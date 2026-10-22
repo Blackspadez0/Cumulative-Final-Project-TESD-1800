@@ -18,13 +18,26 @@
             </nav>
         </div>
 
+        
         <main class="page-content">
-            <form id="login-form">
-                <label>Username: <input name="Email" type="email" required autocomplete="email" /></label>
-                <label>Password: <input name="Password" type="password" required autocomplete="current-password" /></label>
+            <form id="signin-form">
+                <label>
+                    Username:
+                    <input name="Email" type="email" required autocomplete="email" />
+                </label>
+
+                <label>
+                    Password:
+                    <input name="Password" type="password" required autocomplete="current-password" />
+                </label>
+
                 <button type="submit">Sign in</button>
             </form>
+
+            <button id="logout-button" type="button" hidden>Log out</button>
+
             <p id="account-message" role="status" aria-live="polite" hidden></p>
         </main>
+
     </body>
 </html>

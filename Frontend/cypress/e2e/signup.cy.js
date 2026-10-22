@@ -1,6 +1,6 @@
 
 const API_URL = "http://localhost:5223/accountAPI";
-const ACCOUNTS_PAGE = "http://localhost:5173/Accounts.html";
+const ACCOUNTS_PAGE = "http://localhost:5173/Signup.html";
 
 describe("account creation", () => {
   it("displays a visible form with required email and password fields", () => {
