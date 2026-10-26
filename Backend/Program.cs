@@ -1,6 +1,34 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services
+    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+
+        // API requests should receive status codes, not HTML redirects.
+        options.Events.OnRedirectToLogin = context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return Task.CompletedTask;
+        };
+
+        options.Events.OnRedirectToAccessDenied = context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            return Task.CompletedTask;
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddScoped<IPasswordHasher<Account>, PasswordHasher<Account>>();
 
 // 1. Setup SQLite Database File
 // 1. Setup TWO Separate SQLite Database Files
@@ -17,13 +45,16 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins("http://localhost:5173")
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
 var app = builder.Build();
 
 app.UseCors();
+app.UseAuthentication();
+app.UseAuthorization();
 
 // 3. Ensure BOTH Databases Exist on Startup
 using (var scope = app.Services.CreateScope())
@@ -39,6 +70,7 @@ using (var scope = app.Services.CreateScope())
 // 4. Register the separate API modules
 app.MapProductEndpoints();
 app.MapAccountEndpoints();
+app.MapSigninEndpoints();
 // ----------------------------------
 
 app.Run();

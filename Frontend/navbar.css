@@ -1,0 +1,81 @@
+@layer demo;
+
+@layer demo {
+  :root{
+    --nav-indicator-hover: rgb(0, 105, 168); 
+    --nav-indicator-active: rgb(0, 166, 244);
+		--nav-bg: rgb(5, 47, 74);
+    --nav-link-color: white;
+		--nav-link-color-active: white;
+		--nav-padding: 1px;
+		--nav-border-radius: 999vw;
+
+    --nav-trans-duration: 500ms;
+    --nav-trans-easing: ease-in-out;
+  }
+  /* demo code goes here */
+  .wrapper {
+    position: fixed;
+    top: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: fit-content;
+    margin: 0 auto;
+    padding: var(--nav-padding);
+    background-color: var(--nav-bg);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: var(--nav-border-radius);
+    isolation: isolate;
+
+    &::before,
+    &::after{
+      content: '';
+      position: absolute;
+      top: anchor(top);
+      left: anchor(left);
+      right: anchor(right);
+      bottom: anchor(bottom);
+      z-index: -1;
+      background: var(--nav-indicator-hover);
+      transition:  var(--nav-trans-duration) var(--nav-trans-easing);
+      pointer-events: none;
+      border-radius: inherit;
+    }
+    
+     &::before{
+      position-anchor: --hovered-option;
+    }
+
+    &::after{
+      background: var(--nav-indicator-active);
+      position-anchor: --active-option;
+    }
+  }
+
+  nav{
+    anchor-name: --hovered-option;
+    display: flex;
+    align-items: center;
+    & > a{
+      display: block;
+      padding: .5em 1em;
+      text-decoration: none;
+      color: var(--nav-link-color);
+      font-size: 1.2rem;
+			transition: color 150ms ease-in-out;
+      &:hover{
+        anchor-name: --hovered-option;
+      }
+    }
+  }
+}
+/* active link */
+.navbar > a.active {
+    anchor-name: --active-option;
+    color: var(--nav-link-color-active);
+}
+
+.page-content {
+    padding-top: 10rem;
+}

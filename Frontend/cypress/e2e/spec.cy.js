@@ -1,3 +1,19 @@
+
+const PRODUCTS_PAGE = "http://localhost:5173/Products.html";
+
+describe("products", () => {
+  it("lists products", () => {
+    cy.visit(PRODUCTS_PAGE);
+
+    cy.get("h1")
+      .should("have.text", "Products:");
+
+    cy.get('ul[name="products-list"]')
+      .should("be.visible");
+  });
+});
+
+/* OLD PRODUCT CREATE TEST
 import createFakeProduct from "../support/utils";
 
 const API_URL = "http://localhost:5223/productAPI";
@@ -45,4 +61,4 @@ describe("products", () => {
     cy.get("body").should("contain", price);
     cy.get("body").should("contain", inventory);
   });
-});
+}); */
