@@ -1,25 +1,32 @@
-// ***********************************************
-// This example commands.js shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
-// ***********************************************
-//
-//
-// -- This is a parent command --
-// Cypress.Commands.add('login', (email, password) => { ... })
-//
-//
-// -- This is a child command --
-// Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add('dismiss', { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This will overwrite an existing command --
-// Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+const ACCOUNT_API = "http://localhost:5223/accountAPI";
+const SIGNIN_PAGE = "http://localhost:5173/Signin.html";
+
+Cypress.Commands.add("createAccountAndLogin", () => {
+    const email = `purchase-${Date.now()}-${Math.random()
+        .toString(36)
+        .slice(2)}@example.com`;
+    const password = "TestPassword123!";
+
+    return cy.request("POST", ACCOUNT_API, {
+        email,
+        password,
+    }).then((response) => {
+        expect(response.status).to.eq(201);
+
+        cy.visit(SIGNIN_PAGE);
+
+        cy.get('#signin-form input[name="Email"]')
+            .clear()
+            .type(email);
+
+        cy.get('#signin-form input[name="Password"]')
+            .clear()
+            .type(password);
+
+        cy.get('#signin-form button[type="submit"]').click();
+
+        return cy.contains("button", /log\s*out/i)
+            .should("be.visible");
+    });
+});

@@ -69,6 +69,7 @@ using (var scope = app.Services.CreateScope())
 // --- ADDED/CHANGED THIS SECTION ---
 // 4. Register the separate API modules
 app.MapProductEndpoints();
+app.MapPurchaseEndpoints();
 app.MapAccountEndpoints();
 app.MapSigninEndpoints();
 // ----------------------------------
@@ -93,6 +94,7 @@ public class ProductDbContext : DbContext
     public ProductDbContext(DbContextOptions<ProductDbContext> options) : base(options) { }
 
     public DbSet<Product> Products => Set<Product>();
+    public DbSet<Purchase> Purchases => Set<Purchase>();
 }
 
 // --- ACCOUNTS DATA ---
@@ -108,4 +110,14 @@ public class AccountDbContext : DbContext
 {
     public AccountDbContext(DbContextOptions<AccountDbContext> options) : base(options) { }
     public DbSet<Account> Accounts => Set<Account>();
+}
+
+// --- PURCHASE DATA ---
+public class Purchase
+{
+    public int Id { get; set; }
+    public int ProductId { get; set; }
+    public int BuyerAccountId { get; set; }
+    public decimal PriceAtPurchase { get; set; }
+    public DateTime PurchasedAt { get; set; }
 }
