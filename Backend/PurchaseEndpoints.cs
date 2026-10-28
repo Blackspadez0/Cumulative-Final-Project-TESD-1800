@@ -21,6 +21,8 @@ public static class PurchaseEndpoints
                     new { message = "Quantity must be greater than zero." });
             }
 
+            // The buyer's identity comes from the authenticated session,
+            // not from a buyer ID supplied in the request body.
             var buyerIdValue = httpContext.User
                 .FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -29,6 +31,37 @@ public static class PurchaseEndpoints
                 return Results.Unauthorized();
             }
 
+            // Keep the inventory update and purchase creation together.
+            await using var transaction =
+                await db.Database.BeginTransactionAsync();
+
+            // Atomically reduce inventory only if enough units remain.
+            // This prevents concurrent requests from overselling inventory.
+            var updatedRows = await db.Products
+                .Where(p =>
+                    p.Id == request.ProductId &&
+                    p.InventoryCount >= request.Quantity)
+                .ExecuteUpdateAsync(setters =>
+                    setters.SetProperty(
+                        p => p.InventoryCount,
+                        p => p.InventoryCount - request.Quantity));
+
+            if (updatedRows == 0)
+            {
+                var productExists = await db.Products
+                    .AnyAsync(p => p.Id == request.ProductId);
+
+                if (!productExists)
+                {
+                    return Results.NotFound(
+                        new { message = "Product not found." });
+                }
+
+                return Results.Conflict(
+                    new { message = "Insufficient inventory." });
+            }
+
+            // Read the product price for the purchase record.
             var product = await db.Products
                 .FirstOrDefaultAsync(p => p.Id == request.ProductId);
 
@@ -38,25 +71,19 @@ public static class PurchaseEndpoints
                     new { message = "Product not found." });
             }
 
-            if (request.Quantity > product.InventoryCount)
-            {
-                return Results.Conflict(
-                    new { message = "Insufficient inventory." });
-            }
-
             var purchase = new Purchase
             {
                 ProductId = product.Id,
                 BuyerAccountId = buyerAccountId,
+                Quantity = request.Quantity,
                 PriceAtPurchase = product.Price,
                 PurchasedAt = DateTime.UtcNow
             };
 
-            product.InventoryCount -= request.Quantity;
-
             db.Purchases.Add(purchase);
 
             await db.SaveChangesAsync();
+            await transaction.CommitAsync();
 
             return Results.Created(
                 $"/purchaseAPI/{purchase.Id}",

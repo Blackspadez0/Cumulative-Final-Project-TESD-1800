@@ -23,8 +23,6 @@ async function updateAuthenticationUI() {
         isLoggedIn = false;
         console.error("Unable to check sign-in status.", error);
     }
-
-    console.log("isLoggedIn:", isLoggedIn);
 }
 
 // Load and render products.
@@ -68,6 +66,7 @@ async function loadProducts() {
             quantityInput.required = true;
             quantityInput.value = "0";
             quantityInput.step = "1";
+            quantityInput.min = "1";
 
             quantityLabel.appendChild(quantityInput);
 
@@ -76,15 +75,20 @@ async function loadProducts() {
             submitButton.textContent = "Purchase";
             submitButton.disabled = true;
 
-            // Enable the button only for a valid quantity.
-            quantityInput.addEventListener("input", () => {
+            // Keep the button enabled only for a valid quantity.
+            function updatePurchaseButton() {
                 const quantity = quantityInput.valueAsNumber;
 
                 submitButton.disabled =
                     !Number.isInteger(quantity) ||
                     quantity <= 0 ||
                     quantity > inventoryCount;
-            });
+            }
+
+            quantityInput.addEventListener(
+                "input",
+                updatePurchaseButton
+            );
 
             // Submit a purchase.
             purchaseForm.addEventListener("submit", async (event) => {
@@ -98,7 +102,7 @@ async function loadProducts() {
                     quantity <= 0 ||
                     quantity > inventoryCount
                 ) {
-                    submitButton.disabled = true;
+                    updatePurchaseButton();
                     return;
                 }
 
@@ -130,29 +134,58 @@ async function loadProducts() {
                     }
 
                     if (!purchaseResponse.ok) {
-                        throw new Error(
-                            `Unable to complete purchase. Status: ${purchaseResponse.status}`
-                        );
+                        let errorBody = {};
+
+                        try {
+                            errorBody = await purchaseResponse.json();
+                        } catch {
+                            // Use a fallback message if the response
+                            // does not contain readable JSON.
+                        }
+
+                        purchaseMessage.textContent =
+                            errorBody.message ??
+                            "Unable to complete purchase. Please try again.";
+
+                        // Inventory may have changed since this form loaded.
+                        if (purchaseResponse.status === 409) {
+                            try {
+                                await loadProducts();
+                            } catch (error) {
+                                console.error(
+                                    "Unable to refresh products.",
+                                    error
+                                );
+                            }
+                        } else {
+                            updatePurchaseButton();
+                        }
+
+                        return;
                     }
 
                     const purchase = await purchaseResponse.json();
-                    const purchaseId = purchase.id ?? purchase.Id;
 
                     purchaseMessage.textContent =
-                        `Purchase successful! Purchase ID: ${purchaseId}`;
+                        `Purchase successful! Purchase ID: ${purchase.id}`;
 
-                    // Reload products so the updated inventory appears.
+                    // Refresh inventory after a successful purchase.
                     try {
                         await loadProducts();
                     } catch (error) {
-                        console.error("Unable to refresh products.", error);
+                        console.error(
+                            "Unable to refresh products.",
+                            error
+                        );
                     }
                 } catch (error) {
-                    console.error(error);
-                    purchaseMessage.textContent =
-                        "Unable to complete purchase. Please try again.";
+                    console.error("Purchase request failed.", error);
 
-                    submitButton.disabled = false;
+                    purchaseMessage.textContent =
+                        "Unable to connect to the server. Please try again.";
+
+                    // Re-enable only if the entered quantity is still valid.
+                    updatePurchaseButton();
                 }
             });
 
@@ -174,7 +207,7 @@ async function initializeProductsPage() {
     try {
         await loadProducts();
     } catch (error) {
-        console.error(error);
+        console.error("Unable to load products.", error);
     }
 }
 

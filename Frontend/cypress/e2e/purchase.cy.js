@@ -17,7 +17,7 @@ function createProduct(productName, inventoryCount) {
         expect(response.status).to.eq(201);
 
         return {
-            id: response.body.id ?? response.body.Id,
+            id: response.body.id,
             name: productName,
             inventoryCount,
         };
@@ -75,8 +75,10 @@ describe("Product purchases", () => {
 
                 cy.get('input[name="quantity"]')
                     .should("be.visible")
-                    .and("have.attr", "type", "number")
-                    .and("have.attr", "required");
+                    .and("have.attr", "type", "number");
+
+                cy.get('input[name="quantity"]')
+                    .should("have.attr", "required");
 
                 cy.get('input[name="quantity"]')
                     .should("have.value", "0");
@@ -87,7 +89,8 @@ describe("Product purchases", () => {
                     .should("exist");
 
                 cy.get('button[type="submit"]')
-                    .should("be.visible");
+                    .should("be.visible")
+                    .and("be.disabled");
             });
         });
     });
@@ -101,24 +104,26 @@ describe("Product purchases", () => {
             visitProducts();
 
             findProduct(productName).within(() => {
-                cy.get('input[name="quantity"]')
-                    .clear()
-                    .type("-1");
+                const quantityInput = () =>
+                    cy.get('input[name="quantity"]');
 
-                cy.get('button[type="submit"]')
-                    .should("be.disabled");
+                const purchaseButton = () =>
+                    cy.get('button[type="submit"]');
 
-                cy.get('input[name="quantity"]')
-                    .clear()
-                    .type("0");
+                // First prove that the button can become enabled.
+                quantityInput().clear().type("2");
+                purchaseButton().should("be.enabled");
 
-                cy.get('button[type="submit"]')
-                    .should("be.disabled");
+                quantityInput().clear().type("-1");
+                purchaseButton().should("be.disabled");
+
+                quantityInput().clear().type("0");
+                purchaseButton().should("be.disabled");
             });
         });
     });
 
-    it("keeps the purchase button disabled when quantity exceeds inventory", () => {
+    it("allows the exact inventory quantity but disables excess quantities", () => {
         cy.createAccountAndLogin();
 
         const inventoryCount = 5;
@@ -128,12 +133,23 @@ describe("Product purchases", () => {
             visitProducts();
 
             findProduct(productName).within(() => {
-                cy.get('input[name="quantity"]')
+                const quantityInput = () =>
+                    cy.get('input[name="quantity"]');
+
+                const purchaseButton = () =>
+                    cy.get('button[type="submit"]');
+
+                quantityInput()
+                    .clear()
+                    .type(String(inventoryCount));
+
+                purchaseButton().should("be.enabled");
+
+                quantityInput()
                     .clear()
                     .type(String(inventoryCount + 1));
 
-                cy.get('button[type="submit"]')
-                    .should("be.disabled");
+                purchaseButton().should("be.disabled");
             });
         });
     });
@@ -163,8 +179,104 @@ describe("Product purchases", () => {
                 .and("contain.text", "Purchase successful!")
                 .invoke("text")
                 .should("match", /Purchase ID:\s*\d+/);
+
             findProduct(productName)
-                .should("contain.text", `Inventory: ${inventoryCount - quantityToBuy}`);
+                .should(
+                    "contain.text",
+                    `Inventory: ${inventoryCount - quantityToBuy}`
+                );
+        });
+    });
+
+    it("rejects purchase API requests when logged out", () => {
+        cy.createAccountAndLogin();
+
+        const productName = `Unauthenticated Purchase ${Date.now()}`;
+
+        createProduct(productName, 5).then((product) => {
+            // Remove the browser's authentication cookie before the API call.
+            cy.clearCookies();
+
+            cy.request({
+                method: "POST",
+                url: `${PURCHASE_API}/`,
+                body: {
+                    productId: product.id,
+                    quantity: 1,
+                },
+                failOnStatusCode: false,
+            }).then((response) => {
+                expect(response.status).to.eq(401);
+            });
+        });
+    });
+
+    it("rejects invalid quantities and preserves inventory", () => {
+        cy.createAccountAndLogin();
+
+        const inventoryCount = 5;
+        const productName = `API Quantity Validation ${Date.now()}`;
+
+        createProduct(productName, inventoryCount).then((product) => {
+            cy.request({
+                method: "POST",
+                url: `${PURCHASE_API}/`,
+                body: {
+                    productId: product.id,
+                    quantity: -1,
+                },
+                failOnStatusCode: false,
+            }).its("status").should("eq", 400);
+
+            cy.request({
+                method: "POST",
+                url: `${PURCHASE_API}/`,
+                body: {
+                    productId: product.id,
+                    quantity: 0,
+                },
+                failOnStatusCode: false,
+            }).its("status").should("eq", 400);
+
+            cy.request({
+                method: "POST",
+                url: `${PURCHASE_API}/`,
+                body: {
+                    productId: product.id,
+                    quantity: inventoryCount + 1,
+                },
+                failOnStatusCode: false,
+            }).its("status").should("eq", 409);
+
+            cy.request({
+                url: PRODUCT_API,
+            }).then((response) => {
+                expect(response.status).to.eq(200);
+
+                const savedProduct = response.body.find(
+                    (item) => item.id === product.id
+                );
+
+                expect(savedProduct).to.exist;
+                expect(savedProduct.inventoryCount)
+                    .to.eq(inventoryCount);
+            });
+        });
+    });
+
+    it("returns not found for a nonexistent product", () => {
+        cy.createAccountAndLogin();
+
+        cy.request({
+            method: "POST",
+            url: `${PURCHASE_API}/`,
+            body: {
+                productId: -1,
+                quantity: 1,
+            },
+            failOnStatusCode: false,
+        }).then((response) => {
+            expect(response.status).to.eq(404);
         });
     });
 });
