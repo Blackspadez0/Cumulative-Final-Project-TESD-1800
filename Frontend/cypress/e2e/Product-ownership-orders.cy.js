@@ -139,22 +139,129 @@ describe("Sprint 2: product ownership and private orders", () => {
     });
   });
 
-  it("does not disclose seller orders to another seller", () => {
-    createAccount("seller-private-owner").then(() => {
-      createProduct(`Private Seller Product ${Date.now()}`).then((product) => {
-        createAccount("seller-private-buyer").then(() => {
-          cy.request("POST", `${API}/purchaseAPI/`, { productId: product.id, quantity: 1 });
-          createAccount("seller-private-outsider").then(() => {
-            cy.request(`${API}/purchaseAPI/seller`).its("body").should("have.length", 0);
-            cy.visit(PRODUCTS_PAGE);
-            cy.contains("button", "Orders for My Products").click();
-            cy.get("#seller-orders-section").should("be.visible").and("not.contain.text", "Private Seller Product");
-            screenshot("06-seller-orders-hidden-from-other-seller");
+  
+  it("shows each seller only purchases made for their own products when both sellers have sales", () => {
+    // Create Seller A and their product.
+    createAccount("seller-isolation-a").then((sellerA) => {
+      createProduct(`Seller A Product ${sellerA.id}`).then((productA) => {
+
+        // Buyer A purchases Seller A's product.
+        createAccount("seller-isolation-buyer-a").then((buyerA) => {
+          cy.request("POST", `${API}/purchaseAPI/`, {
+            productId: productA.id,
+            quantity: 2,
+          }).then((purchaseAResponse) => {
+            expect(purchaseAResponse.status).to.eq(201);
+            const purchaseAId = purchaseAResponse.body.id;
+
+            // Create Seller B and their separate product.
+            createAccount("seller-isolation-b").then((sellerB) => {
+              createProduct(`Seller B Product ${sellerB.id}`).then((productB) => {
+
+                // Buyer B purchases Seller B's product.
+                createAccount("seller-isolation-buyer-b").then(() => {
+                  cy.request("POST", `${API}/purchaseAPI/`, {
+                    productId: productB.id,
+                    quantity: 3,
+                  }).then((purchaseBResponse) => {
+                    expect(purchaseBResponse.status).to.eq(201);
+                    const purchaseBId = purchaseBResponse.body.id;
+
+                    // Authenticate as Seller A.
+                    cy.request("POST", `${API}/accountAPI/signin`, {
+                      email: sellerA.email,
+                      password: PASSWORD,
+                    }).its("status").should("eq", 200);
+
+                    // Verify Seller A receives only sales for Product A.
+                    cy.request(`${API}/purchaseAPI/seller`).then((response) => {
+                      expect(response.status).to.eq(200);
+                      expect(response.body).to.have.length(1);
+                      expect(response.body[0]).to.include({
+                        id: purchaseAId,
+                        productId: productA.id,
+                        quantity: 2,
+                      });
+
+                      expect(response.body.some(
+                        (order) => order.id === purchaseBId
+                      )).to.eq(false);
+                    });
+
+                    // Verify Seller A's rendered order history.
+                    cy.intercept("GET", `${API}/purchaseAPI/seller`)
+                      .as("sellerAOrders");
+
+                    cy.visit(PRODUCTS_PAGE);
+                    cy.contains("button", "Orders for My Products")
+                      .should("be.visible")
+                      .click();
+
+                    cy.wait("@sellerAOrders").then(({ response }) => {
+                      expect(response.statusCode).to.eq(200);
+                      expect(response.body.map((order) => order.id))
+                        .to.deep.equal([purchaseAId]);
+                    });
+
+                    cy.get("#seller-orders-section")
+                      .should("be.visible")
+                      .and("contain.text", productA.name)
+                      .and("not.contain.text", productB.name);
+
+                    screenshot("06-seller-a-sees-only-own-orders");
+
+                    // Switch authentication to Seller B.
+                    cy.request("POST", `${API}/accountAPI/signin`, {
+                      email: sellerB.email,
+                      password: PASSWORD,
+                    }).its("status").should("eq", 200);
+
+                    // Verify Seller B receives only sales for Product B.
+                    cy.request(`${API}/purchaseAPI/seller`).then((response) => {
+                      expect(response.status).to.eq(200);
+                      expect(response.body).to.have.length(1);
+                      expect(response.body[0]).to.include({
+                        id: purchaseBId,
+                        productId: productB.id,
+                        quantity: 3,
+                      });
+
+                      expect(response.body.some(
+                        (order) => order.id === purchaseAId
+                      )).to.eq(false);
+                    });
+
+                    // Verify Seller B's rendered order history.
+                    cy.intercept("GET", `${API}/purchaseAPI/seller`)
+                      .as("sellerBOrders");
+
+                    cy.visit(PRODUCTS_PAGE);
+                    cy.contains("button", "Orders for My Products")
+                      .should("be.visible")
+                      .click();
+
+                    cy.wait("@sellerBOrders").then(({ response }) => {
+                      expect(response.statusCode).to.eq(200);
+                      expect(response.body.map((order) => order.id))
+                        .to.deep.equal([purchaseBId]);
+                    });
+
+                    cy.get("#seller-orders-section")
+                      .should("be.visible")
+                      .and("contain.text", productB.name)
+                      .and("not.contain.text", productA.name);
+
+                    screenshot("06-seller-b-sees-only-own-orders");
+                  });
+                });
+              });
+            });
           });
         });
       });
     });
   });
+
 
   it("shows buyers only purchases made by their own account", () => {
     createAccount("buyer-orders-seller").then(() => {
@@ -174,22 +281,125 @@ describe("Sprint 2: product ownership and private orders", () => {
     });
   });
 
-  it("does not disclose one buyer's purchases to another customer", () => {
-    createAccount("buyer-private-seller").then(() => {
-      createProduct(`Private Buyer Product ${Date.now()}`).then((product) => {
-        createAccount("buyer-private-customer").then(() => {
-          cy.request("POST", `${API}/purchaseAPI/`, { productId: product.id, quantity: 1 });
-          createAccount("buyer-private-outsider").then(() => {
-            cy.request(`${API}/purchaseAPI/mine`).its("body").should("have.length", 0);
-            cy.visit(PRODUCTS_PAGE);
-            cy.contains("button", "My Purchases").click();
-            cy.get("#my-purchases-section").should("be.visible").and("not.contain.text", "Private Buyer Product");
-            screenshot("08-buyer-purchases-hidden-from-other-customer");
+  
+  it("shows each buyer only their own purchases when both buyers have orders", () => {
+    createAccount("buyer-isolation-seller").then((seller) => {
+      createProduct(`Buyer A Only Product ${seller.id}`).then((productA) => {
+        createProduct(`Buyer B Only Product ${seller.id}`).then((productB) => {
+          // Create Buyer A and record their purchase.
+          createAccount("buyer-isolation-a").then((buyerA) => {
+            cy.request("POST", `${API}/purchaseAPI/`, {
+              productId: productA.id,
+              quantity: 2,
+            }).then((purchaseAResponse) => {
+              expect(purchaseAResponse.status).to.eq(201);
+              const purchaseAId = purchaseAResponse.body.id;
+
+              // Create Buyer B and record a separate purchase.
+              createAccount("buyer-isolation-b").then((buyerB) => {
+                cy.request("POST", `${API}/purchaseAPI/`, {
+                  productId: productB.id,
+                  quantity: 3,
+                }).then((purchaseBResponse) => {
+                  expect(purchaseBResponse.status).to.eq(201);
+                  const purchaseBId = purchaseBResponse.body.id;
+
+                  // Authenticate as Buyer A.
+                  cy.request("POST", `${API}/accountAPI/signin`, {
+                    email: buyerA.email,
+                    password: PASSWORD,
+                  }).its("status").should("eq", 200);
+
+                  // Verify Buyer A's API response contains only their purchase.
+                  cy.request(`${API}/purchaseAPI/mine`).then((response) => {
+                    expect(response.status).to.eq(200);
+                    expect(response.body).to.have.length(1);
+                    expect(response.body[0]).to.include({
+                      id: purchaseAId,
+                      productId: productA.id,
+                      productName: productA.name,
+                      quantity: 2,
+                    });
+
+                    expect(response.body.some(
+                      (order) => order.id === purchaseBId
+                    )).to.eq(false);
+                  });
+
+                  // Verify Buyer A sees only their purchase in the UI.
+                  cy.intercept("GET", `${API}/purchaseAPI/mine`)
+                    .as("buyerAOrders");
+
+                  cy.visit(PRODUCTS_PAGE);
+                  cy.contains("button", "My Purchases")
+                    .should("be.visible")
+                    .click();
+
+                  cy.wait("@buyerAOrders").then(({ response }) => {
+                    expect(response.statusCode).to.eq(200);
+                    expect(response.body.map((order) => order.id))
+                      .to.deep.equal([purchaseAId]);
+                  });
+
+                  cy.get("#my-purchases-section")
+                    .should("be.visible")
+                    .and("contain.text", productA.name)
+                    .and("not.contain.text", productB.name);
+
+                  screenshot("08-buyer-a-sees-only-own-purchases");
+
+                  // Switch authentication to Buyer B.
+                  cy.request("POST", `${API}/accountAPI/signin`, {
+                    email: buyerB.email,
+                    password: PASSWORD,
+                  }).its("status").should("eq", 200);
+
+                  // Verify Buyer B's API response contains only their purchase.
+                  cy.request(`${API}/purchaseAPI/mine`).then((response) => {
+                    expect(response.status).to.eq(200);
+                    expect(response.body).to.have.length(1);
+                    expect(response.body[0]).to.include({
+                      id: purchaseBId,
+                      productId: productB.id,
+                      productName: productB.name,
+                      quantity: 3,
+                    });
+
+                    expect(response.body.some(
+                      (order) => order.id === purchaseAId
+                    )).to.eq(false);
+                  });
+
+                  // Reload under Buyer B's session before checking the UI.
+                  cy.intercept("GET", `${API}/purchaseAPI/mine`)
+                    .as("buyerBOrders");
+
+                  cy.visit(PRODUCTS_PAGE);
+                  cy.contains("button", "My Purchases")
+                    .should("be.visible")
+                    .click();
+
+                  cy.wait("@buyerBOrders").then(({ response }) => {
+                    expect(response.statusCode).to.eq(200);
+                    expect(response.body.map((order) => order.id))
+                      .to.deep.equal([purchaseBId]);
+                  });
+
+                  cy.get("#my-purchases-section")
+                    .should("be.visible")
+                    .and("contain.text", productB.name)
+                    .and("not.contain.text", productA.name);
+
+                  screenshot("08-buyer-b-sees-only-own-purchases");
+                });
+              });
+            });
           });
         });
       });
     });
   });
+
 
   it("requires authentication to view either buyer or seller order history", () => {
     cy.clearCookies();
