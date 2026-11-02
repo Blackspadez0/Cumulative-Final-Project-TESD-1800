@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Products</title>
+        <script src="Products.js" type="module"></script>
+        <link rel="stylesheet" href="navbar.css">
+        <script src="navbar.js" defer></script>
+    </head>
+    <body>
+        <div class="wrapper">
+            <nav class="navbar">
+                <a href="Index.html" id="link-1">Home</a>
+                <a href="Products.html" id="link-2">Products</a>
+                <a href="Signin.html" id="link-3">Sign in</a>
+                <a href="Signup.html" id="link-4">Sign up</a>
+            </nav>
+        </div>
+
+        <main class="page-content">
+            <h1>Products:</h1>
+
+            <ul name="products-list"></ul>
+            <p id="purchase-message" role="status" aria-live="polite"></p>
+            <p id="product-message" role="status" aria-live="polite"></p>
+            <div id="order-navigation" hidden>
+                <button id="my-purchases-button" type="button">My Purchases</button>
+                <button id="seller-orders-button" type="button">Orders for My Products</button>
+            </div>
+            <section id="my-purchases-section" hidden>
+                <h2>My Purchases</h2>
+                <ul id="my-purchases-list"></ul>
+            </section>
+            <section id="seller-orders-section" hidden>
+                <h2>Orders for My Products</h2>
+                <ul id="seller-orders-list"></ul>
+            </section>
+
+            <button id="create-product-button" type="button">Create New Product</button>
+
+            <form id="product-form" hidden>
+                <label>Name <input name="product" type="text" required /></label>
+                <label>Price <input name="price" type="number" step="0.01" min="0" required /></label>
+                <label>Inventory <input name="inventory" type="number" step="1" min="0" required /></label>
+                <button type="submit">Create Product</button>
+            </form>
+
+            <div id="confirmation" hidden>
+                <p>Product Created</p>
+                <a href="Products.html">Back to Products</a>
+            </div>
+        </main>
+    </body>
+</html>
