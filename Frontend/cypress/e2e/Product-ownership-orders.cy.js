@@ -23,9 +23,6 @@ function createProduct(name, inventory = 8) {
     });
 }
 
-function screenshot(name) {
-  cy.screenshot(name, { capture: "fullPage" });
-}
 
 describe("Sprint 2: product ownership and private orders", () => {
   it("allows only a logged-in seller to edit their product and reflects the update", () => {
@@ -44,7 +41,7 @@ describe("Sprint 2: product ownership and private orders", () => {
           .and("contain.text", `Product ID: ${product.id}`);
         cy.get(`[data-product-id="${product.id}"]`).should("contain.text", "Edited Product Name")
           .and("contain.text", "$24.75").and("contain.text", "Inventory: 17");
-        screenshot("01-product-edit-owner-success");
+
       });
     });
   });
@@ -69,7 +66,7 @@ describe("Sprint 2: product ownership and private orders", () => {
             expect(products.find((p) => p.id === product.id).name).to.include("Protected Edit");
           });
         });
-        screenshot("02-product-edit-access-denied");
+
       });
     });
   });
@@ -91,7 +88,7 @@ describe("Sprint 2: product ownership and private orders", () => {
           cy.get(`[data-product-id="${product.id}"]`).should("not.exist");
           cy.request("POST", `${API}/accountAPI/signin`, { email: buyer.email, password: PASSWORD });
           cy.request(`${API}/purchaseAPI/mine`).its("body").should("have.length", 0);
-          screenshot("03-product-delete-owner-and-purchases");
+
         });
       });
     });
@@ -114,7 +111,7 @@ describe("Sprint 2: product ownership and private orders", () => {
             expect(products.some((p) => p.id === product.id)).to.eq(true);
           });
         });
-        screenshot("04-product-delete-access-denied");
+
       });
     });
   });
@@ -133,7 +130,7 @@ describe("Sprint 2: product ownership and private orders", () => {
           cy.visit(PRODUCTS_PAGE);
           cy.contains("button", "Orders for My Products").should("be.visible").click();
           cy.get("#seller-orders-section").should("be.visible").and("contain.text", `Seller Order Product ${seller.id}`);
-          screenshot("05-seller-orders-visible-to-owner");
+
         });
       });
     });
@@ -208,8 +205,6 @@ describe("Sprint 2: product ownership and private orders", () => {
                       .and("contain.text", productA.name)
                       .and("not.contain.text", productB.name);
 
-                    screenshot("06-seller-a-sees-only-own-orders");
-
                     // Switch authentication to Seller B.
                     cy.request("POST", `${API}/accountAPI/signin`, {
                       email: sellerB.email,
@@ -251,7 +246,6 @@ describe("Sprint 2: product ownership and private orders", () => {
                       .and("contain.text", productB.name)
                       .and("not.contain.text", productA.name);
 
-                    screenshot("06-seller-b-sees-only-own-orders");
                   });
                 });
               });
@@ -275,7 +269,7 @@ describe("Sprint 2: product ownership and private orders", () => {
           cy.visit(PRODUCTS_PAGE);
           cy.contains("button", "My Purchases").should("be.visible").click();
           cy.get("#my-purchases-section").should("be.visible").and("contain.text", "Buyer Order Product");
-          screenshot("07-buyer-purchases-visible-to-owner");
+
         });
       });
     });
@@ -346,8 +340,6 @@ describe("Sprint 2: product ownership and private orders", () => {
                     .and("contain.text", productA.name)
                     .and("not.contain.text", productB.name);
 
-                  screenshot("08-buyer-a-sees-only-own-purchases");
-
                   // Switch authentication to Buyer B.
                   cy.request("POST", `${API}/accountAPI/signin`, {
                     email: buyerB.email,
@@ -390,7 +382,6 @@ describe("Sprint 2: product ownership and private orders", () => {
                     .and("contain.text", productB.name)
                     .and("not.contain.text", productA.name);
 
-                  screenshot("08-buyer-b-sees-only-own-purchases");
                 });
               });
             });
@@ -409,6 +400,6 @@ describe("Sprint 2: product ownership and private orders", () => {
       .its("status").should("eq", 401);
     cy.visit(PRODUCTS_PAGE);
     cy.get("#order-navigation").should("not.be.visible");
-    screenshot("09-order-history-requires-login");
+
   });
 });

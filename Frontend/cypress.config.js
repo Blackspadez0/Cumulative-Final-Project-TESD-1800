@@ -1,8 +1,8 @@
 const { defineConfig } = require("cypress");
 
 module.exports = defineConfig({
-  video: true,
-  screenshotOnRunFailure: true,
+  video: false,
+  screenshotOnRunFailure: false,
   e2e: {
     baseUrl: "http://localhost:5173",
     screenshotsFolder: "cypress/screenshots",
