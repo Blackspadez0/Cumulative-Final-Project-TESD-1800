@@ -23,6 +23,19 @@
 
             <ul name="products-list"></ul>
             <p id="purchase-message" role="status" aria-live="polite"></p>
+            <p id="product-message" role="status" aria-live="polite"></p>
+            <div id="order-navigation" hidden>
+                <button id="my-purchases-button" type="button">My Purchases</button>
+                <button id="seller-orders-button" type="button">Orders for My Products</button>
+            </div>
+            <section id="my-purchases-section" hidden>
+                <h2>My Purchases</h2>
+                <ul id="my-purchases-list"></ul>
+            </section>
+            <section id="seller-orders-section" hidden>
+                <h2>Orders for My Products</h2>
+                <ul id="seller-orders-list"></ul>
+            </section>
 
             <button id="create-product-button" type="button">Create New Product</button>
 

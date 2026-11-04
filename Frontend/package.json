@@ -1,6 +1,8 @@
 {
   "scripts": {
-    "dev": "npx vite --host"
+    "dev": "npx vite --host",
+    "cy:run": "cypress run",
+    "cy:open": "cypress open"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.6.0",

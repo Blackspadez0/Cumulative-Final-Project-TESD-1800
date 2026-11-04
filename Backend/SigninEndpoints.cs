@@ -59,6 +59,7 @@ public static class SigninEndpoints
         {
             return Results.Ok(new
             {
+                id = user.FindFirst(ClaimTypes.NameIdentifier)?.Value,
                 email = user.FindFirst(ClaimTypes.Email)?.Value
             });
         }).RequireAuthorization();

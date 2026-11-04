@@ -62,6 +62,21 @@ using (var scope = app.Services.CreateScope())
     var productDb = scope.ServiceProvider.GetRequiredService<ProductDbContext>();
     productDb.Database.EnsureCreated();
 
+    // Fulfills backward compatibility: EnsureCreated does not alter an existing SQLite schema.
+    var connection = productDb.Database.GetDbConnection();
+    connection.Open();
+    using (var command = connection.CreateCommand())
+    {
+        command.CommandText = "SELECT COUNT(*) FROM pragma_table_info('Products') WHERE name = 'SellerAccountId'";
+        var hasSellerColumn = Convert.ToInt32(command.ExecuteScalar()) > 0;
+        if (!hasSellerColumn)
+        {
+            command.CommandText = "ALTER TABLE Products ADD COLUMN SellerAccountId INTEGER NULL";
+            command.ExecuteNonQuery();
+        }
+    }
+    connection.Close();
+
     var accountDb = scope.ServiceProvider.GetRequiredService<AccountDbContext>();
     accountDb.Database.EnsureCreated();
 }
@@ -87,6 +102,7 @@ public class Product
     public string Name { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public int InventoryCount { get; set; }
+    public int? SellerAccountId { get; set; }
 }
 
 public class ProductDbContext : DbContext
